@@ -1,0 +1,10 @@
+{
+  "model": "LogisticRegression (baseline)",
+  "accuracy": 0.8055,
+  "precision": 0.6572,
+  "recall": 0.5588,
+  "f1": 0.604,
+  "roc_auc": 0.8419,
+  "train_rows": 5634,
+  "test_rows": 1409
+}
