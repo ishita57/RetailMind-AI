@@ -1,45 +1,28 @@
-"""The platform's first 'ML service': a thin predict() helper around the saved model.
+"""RetailMind's ML service: load a saved model and predict churn for one customer.
 
-Usage:
-    from src.predict import predict
-    predict({...customer fields...})      # -> {"churn_probability": 0.71, "churn_prediction": "Yes", ...}
-
-Or run `python -m src.predict` for a demo with a sample customer.
+By default it uses the Day 1 model. Pass model_path to use a newer one
+(e.g. models/churn_v4.joblib).
 """
 import joblib
+import pandas as pd
 
 from src.config import MODEL_PATH
 
-_model = None  # loaded once, reused across calls
+_models = {}   # cache, so each model file is only loaded once
 
 
-def _get_model():
-    global _model
-    if _model is None:
-        _model = joblib.load(MODEL_PATH)
-    return _model
+def _get_model(model_path):
+    key = str(model_path)
+    if key not in _models:
+        _models[key] = joblib.load(model_path)
+    return _models[key]
 
 
-def predict(customer: dict, threshold: float = 0.5) -> dict:
-    """Score one customer (a dict of raw fields, same columns as the CSV minus customerID/Churn)."""
-    import pandas as pd
-
-    proba = float(_get_model().predict_proba(pd.DataFrame([customer]))[0, 1])
+def predict(customer: dict, threshold: float = 0.5, model_path=MODEL_PATH) -> dict:
+    model = _get_model(model_path)
+    proba = float(model.predict_proba(pd.DataFrame([customer]))[0, 1])
     return {
         "churn_probability": round(proba, 4),
         "churn_prediction": "Yes" if proba >= threshold else "No",
         "risk_level": "High" if proba >= 0.7 else "Medium" if proba >= 0.4 else "Low",
     }
-
-
-SAMPLE_CUSTOMER = {
-    "gender": "Female", "SeniorCitizen": 0, "Partner": "No", "Dependents": "No",
-    "tenure": 2, "PhoneService": "Yes", "MultipleLines": "No",
-    "InternetService": "Fiber optic", "OnlineSecurity": "No", "OnlineBackup": "No",
-    "DeviceProtection": "No", "TechSupport": "No", "StreamingTV": "No",
-    "StreamingMovies": "No", "Contract": "Month-to-month", "PaperlessBilling": "Yes",
-    "PaymentMethod": "Electronic check", "MonthlyCharges": 70.35, "TotalCharges": 140.7,
-}
-
-if __name__ == "__main__":
-    print(predict(SAMPLE_CUSTOMER))
