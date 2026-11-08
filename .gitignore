@@ -5,3 +5,6 @@ venv/
 .ipynb_checkpoints/
 .DS_Store
 .vscode/
+
+# large image dataset (Day 6)
+data/fashion-product-images-small/

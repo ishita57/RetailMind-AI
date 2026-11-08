@@ -120,5 +120,45 @@ The feature gain is small (ROC-AUC +0.0015), because the original columns alread
 
 Recall improved from 0.56 to about 0.78 (we now catch about 4 in 5 churners), at the cost of lower precision.
 
-**Next (Phase 2):** deep learning with a Keras ANN, benchmarked against this model.
+## Phase 2 - Deep learning
+
+### Day 5 - Neural networks and ANN (Keras)
+
+Built a small Keras ANN for churn (normalised inputs, two dense layers, sigmoid output) with early stopping on the
+validation loss and class weights (so recall stays a priority). Warmed up on MNIST first.
+Benchmarked on the same hold-out customers as Phase 1.
+
+|Model|Accuracy|Precision|Recall|F1|ROC-AUC|
+|-|-|-|-|-|-|
+|Phase 1 champion (churn\_v4)|0.7594|0.5318|0.7834|0.6335|0.8447|
+|Keras ANN|0.7211|0.4851|0.8262|0.6113|0.8366|
+
+**Did depth help?** The classical champion is better, so depth did not help here.
+
+**When to use which**
+
+* **Classical ML (Random Forest, XGBoost):** small or medium tables like this one. Fast to train, easy to explain, often just as accurate.
+* **Neural networks:** images, text, audio, or very large datasets with complex patterns, where they can learn features by themselves.
+
+Saved: `models/churn\\\_ann.keras` and `models/churn\\\_ann\\\_preprocessor.joblib`.
+
+### Day 6 - CNN image classification (catalog auto-tagging)
+
+* Prototyped the CNN on Fashion-MNIST, then trained it on Fashion Product Images (Kaggle `paramaggarwal/fashion-product-images-small`):
+the 10 biggest article types, up to 600 images each, 80x60 pixels, with flip/rotation/zoom augmentation.
+* CNN: conv, pool, conv, pool, dropout, dense (`src/cnn.py`). Early stopping on validation loss.
+* The image dataset is not stored in the repo because of its size.
+
+|Dataset|Test accuracy|
+|-|-|
+|Fashion-MNIST (prototype)|0.8819|
+|Fashion Product Images (catalog classifier)|0.8575|
+
+**Most confused categories:** Casual shoes and Sports shoes,Tshirts and Tops, Casual shoes and Heels
+
+Saved: `models/catalog\\\_cnn.keras` and `models/catalog\\\_classes.json`.
+
+**Next:** transfer learning for production-level accuracy, then object detection (YOLO).
+
+
 
